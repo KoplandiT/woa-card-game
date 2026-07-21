@@ -9,14 +9,6 @@ npm install
 npm run dev
 ```
 
-Ha ezen a gépen továbbra sincs globális `npm`, a most letöltött helyi npm-mel is futtatható:
-
-```powershell
-$nodeBin = 'C:\Users\Koplándi Tamás\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin'
-$env:Path = "$nodeBin;$env:Path"
-& "$nodeBin\node.exe" 'D:\Codex\WoA\.tools\package\bin\npm-cli.js' run dev
-```
-
 ## Fontosabb fájlok
 
 - `src/App.tsx`: a fő konténerkomponens. Itt él a `useState`, vagyis a teljes játékállapot frontend oldalon van.
