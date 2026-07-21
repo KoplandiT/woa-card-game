@@ -1,0 +1,2 @@
+cost: 2
+effect: Deal 2 damage to the target unit or HQ

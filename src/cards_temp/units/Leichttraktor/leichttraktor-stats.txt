@@ -1,0 +1,5 @@
+type: light tank
+hp: 2
+attack: 2
+cost: 2
+resource: 0

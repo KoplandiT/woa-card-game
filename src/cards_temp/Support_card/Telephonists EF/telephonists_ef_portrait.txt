@@ -1,0 +1,5 @@
+support card type: medic
+cost: 4
+attack: 0
+hp: 5
+resource: +1

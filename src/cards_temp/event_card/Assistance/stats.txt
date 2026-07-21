@@ -1,0 +1,2 @@
+cost: 2
+effect: Restore 2 HP to your HQ and draw a card

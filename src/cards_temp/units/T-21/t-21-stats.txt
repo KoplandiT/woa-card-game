@@ -1,0 +1,5 @@
+type: medium tank
+hp: 5
+attack: 4
+cost: 5
+resource: +1

@@ -1,0 +1,7 @@
+support card type: scout
+cost: 4
+attack: +1
+hp: 5
+resource: +1
+
+effect: Attack squad HQ power up your HQ by combining thier firepower values. When uses, it's hp decreased by 1. If it's hp is zero then it destroyed.

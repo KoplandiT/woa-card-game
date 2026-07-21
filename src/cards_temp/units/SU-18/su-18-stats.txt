@@ -1,0 +1,5 @@
+type: artillery
+hp: 2
+attack: 1
+cost: 1
+resource: +0

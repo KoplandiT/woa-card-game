@@ -1,0 +1,5 @@
+type: tankdestroyer (páncélvadász)
+hp: 3
+attack: 3
+cost: 4
+resource: 0

@@ -1,0 +1,5 @@
+type: ligth tank
+hp: 3
+attack: 2
+cost: 2
+resource: +1

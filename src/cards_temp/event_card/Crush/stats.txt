@@ -1,0 +1,2 @@
+cost: 9
+effect: Deal 5 damage to the enemy HQ

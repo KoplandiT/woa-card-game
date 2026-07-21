@@ -1,0 +1,5 @@
+type: heavy tank
+hp: 8
+attack: 2
+cost: 4
+resource: +1
