@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import fieldManualTileImage from '../assets/menu/field-manual-tile.jpg';
+import mainMenuBackgroundImage from '../assets/menu/main-menu-tank-bg.jpg';
 import pveTileImage from '../assets/menu/pve-tile.jpg';
 import pvpTileImage from '../assets/menu/pvp-tile.jpg';
 import { RulesScreen } from './RulesScreen';
@@ -19,13 +20,16 @@ export function StartScreen({ onStart }: StartScreenProps) {
 
   return (
     <main className="start-screen">
+      <img className="start-screen__background" src={mainMenuBackgroundImage} alt="" />
+      <span className="start-screen__motion start-screen__motion--scan" aria-hidden="true" />
+      <span className="start-screen__motion start-screen__motion--dust" aria-hidden="true" />
       <section className="start-menu">
         <header className="start-menu__header">
           <span className="eyebrow">Tactical card prototype</span>
           <h1>Armored Generals</h1>
         </header>
 
-        <div className="mode-tiles" aria-label="Game mode">
+        <div className="menu-stack" aria-label="Main menu">
           <button className="mode-tile" onClick={() => onStart('pvp')}>
             <img src={pvpTileImage} alt="" />
             <span className="mode-tile__shade" />
@@ -45,21 +49,21 @@ export function StartScreen({ onStart }: StartScreenProps) {
               <span>NPC skirmish</span>
             </span>
           </button>
-        </div>
 
-        <button className="wiki-tile" onClick={() => setIsRulesOpen(true)}>
-          <img src={fieldManualTileImage} alt="" />
-          <span className="mode-tile__shade" />
-          <span className="wiki-tile__index">03</span>
-          <span className="wiki-tile__content">
-            <strong>Field Manual</strong>
-            <span>Rules wiki</span>
-          </span>
-        </button>
+          <button className="wiki-tile" onClick={() => setIsRulesOpen(true)}>
+            <img src={fieldManualTileImage} alt="" />
+            <span className="mode-tile__shade" />
+            <span className="wiki-tile__index">03</span>
+            <span className="wiki-tile__content">
+              <strong>Field Manual</strong>
+              <span>Rules wiki</span>
+            </span>
+          </button>
+        </div>
 
         <footer className="start-menu__footer">
           <span>Select operation</span>
-          <span>Armored Command Network</span>
+          <span>Armored Command Network (Beta version)</span>
         </footer>
       </section>
     </main>

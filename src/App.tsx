@@ -6,6 +6,7 @@ import { HqSelectionScreen } from './components/HqSelectionScreen';
 import { PlayerPanel } from './components/PlayerPanel';
 import { ScoreboardModal } from './components/ScoreboardModal';
 import { StartScreen } from './components/StartScreen';
+import { CardView } from './components/CardView';
 import { applyGameAction } from './game/gameActions';
 import { chooseBotActionForDifficulty } from './game/bots/botController';
 import {
@@ -23,7 +24,7 @@ import {
   selectUnit,
   startGame,
 } from './game/gameLogic';
-import type { BoardEffect, BoardSlot, GameAction, GameState } from './types';
+import type { BoardEffect, BoardSlot, CardInstance, GameAction, GameState } from './types';
 
 // Megnezi, hogy egy korabban letezo board elem az akcio utan megsemmisult-e.
 function wasBoardSlotDestroyed(previousSlot: BoardSlot, nextState: GameState, slotIndex?: number) {
@@ -64,17 +65,22 @@ function createActionEffect(previousState: GameState, nextState: GameState, acti
     return createCombatEffect(previousState.board, nextState, action.sourceSlotIndex, action.targetSlotIndex);
   }
 
-  if (action.type === 'play_card' && typeof action.targetSlotIndex === 'number') {
+  if (action.type === 'play_card') {
     const card = previousState.players[previousState.activePlayer].hand.find(
       (handCard) => handCard.instanceId === action.cardInstanceId,
     );
 
-    if (card?.type === 'unit') {
+    if (card?.type === 'unit' && typeof action.targetSlotIndex === 'number') {
       return { type: 'deploy', targetSlot: action.targetSlotIndex };
     }
 
-    if (card?.type === 'command') {
+    if (card?.type === 'command' && typeof action.targetSlotIndex === 'number') {
       return createCombatEffect(previousState.board, nextState, undefined, action.targetSlotIndex);
+    }
+
+    if (card?.type === 'command' && (card.damage ?? 0) > 0 && (card.target === 'enemy_hq' || !card.target)) {
+      const targetSlot = previousState.activePlayer === 1 ? gameConstants.player2HqSlot : gameConstants.player1HqSlot;
+      return createCombatEffect(previousState.board, nextState, undefined, targetSlot);
     }
   }
 
@@ -87,6 +93,7 @@ export default function App() {
   const [game, setGame] = useState(createInitialGame);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [boardEffect, setBoardEffect] = useState<BoardEffect | null>(null);
+  const [revealedEventCard, setRevealedEventCard] = useState<CardInstance | null>(null);
   const isAiTurn = game.gameMode === 'pve' && game.phase === 'playing' && game.activePlayer === 2;
   const activePlayer = game.players[game.activePlayer];
   const selectedCard = activePlayer.hand.find((card) => card.instanceId === selectedCardId) ?? null;
@@ -108,6 +115,15 @@ export default function App() {
     return () => window.clearTimeout(timeoutId);
   }, [boardEffect]);
 
+  useEffect(() => {
+    if (!revealedEventCard) {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => setRevealedEventCard(null), 1700);
+    return () => window.clearTimeout(timeoutId);
+  }, [revealedEventCard]);
+
   // PvE-ben az AI egyesevel hajtja vegre a difficulty alapjan valasztott bot akcioit.
   useEffect(() => {
     if (!isAiTurn || boardEffect) {
@@ -123,8 +139,16 @@ export default function App() {
 
       const nextState = applyGameAction(game, action);
       const effect = createActionEffect(game, nextState, action);
+      const playedCard = action.type === 'play_card'
+        ? game.players[game.activePlayer].hand.find((card) => card.instanceId === action.cardInstanceId)
+        : null;
+
       setSelectedCardId(null);
       setGame(nextState);
+
+      if (playedCard?.type === 'command') {
+        setRevealedEventCard(playedCard);
+      }
 
       if (effect) {
         setBoardEffect({ ...effect, id: Date.now() });
@@ -138,10 +162,17 @@ export default function App() {
     setBoardEffect({ ...effect, id: Date.now() });
   };
 
+  const revealEventCard = (card: CardInstance | null | undefined) => {
+    if (card?.type === 'command') {
+      setRevealedEventCard(card);
+    }
+  };
+
   // Uj jatek inditasakor a UI-ban kijelolt kartyat is torolni kell.
   const resetGame = () => {
     setSelectedCardId(null);
     setBoardEffect(null);
+    setRevealedEventCard(null);
     setGame(createInitialGame());
   };
 
@@ -166,6 +197,7 @@ export default function App() {
     }
 
     setSelectedCardId(null);
+    revealEventCard(card);
     setGame((current) => {
       const next = applyGameAction(current, { type: 'play_card', cardInstanceId: cardId });
       const shouldAnimateEnemyHq = card.type === 'command'
@@ -249,6 +281,16 @@ export default function App() {
 
       {game.phase === 'gameOver' && !boardEffect && <ScoreboardModal game={game} onContinue={resetGame} />}
 
+      {revealedEventCard && (
+        <div className="event-card-reveal" aria-live="polite">
+          <div className="event-card-reveal__halo" aria-hidden="true" />
+          <div className="event-card-reveal__card">
+            <span className="event-card-reveal__label">Event card played</span>
+            <CardView card={revealedEventCard} />
+          </div>
+        </div>
+      )}
+
       <section className="command-row">
         <PlayerPanel player={game.players[1]} isActive={game.activePlayer === 1} />
         <PlayerPanel player={game.players[2]} isActive={game.activePlayer === 2} />
@@ -280,6 +322,7 @@ export default function App() {
           onAttackSlot={(slotIndex) => {
             if (isAiTurn) return;
             if (selectedCard?.type === 'command') {
+              revealEventCard(selectedCard);
               setGame((current) => {
                 const next = applyGameAction(current, {
                   type: 'play_card',
